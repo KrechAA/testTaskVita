@@ -26,6 +26,7 @@ public class TaskService {
 
     /**
      * Creating task
+     *
      * @param taskRequest
      * @return
      */
@@ -112,7 +113,7 @@ public class TaskService {
     }
 
     /**
-     * Adding dashes after characters in task text
+     * Adding dashes after characters in task text and converting to PaginationResult<TaskResponse>
      *
      * @param pR
      * @return
@@ -120,54 +121,13 @@ public class TaskService {
     public PaginationResult<TaskResponse> preparePagResForOperator(PaginationResult<Task> pR) {
         PaginationResult<TaskResponse> pagResForClient = new PaginationResult<>();
         pagResForClient.setRecords(new ArrayList<>());
-
-        for (int i = 0; i < pR.getRecords().size(); i++) {
-            char[] charArr = pR.getRecords().get(i).getText().toCharArray();
-            String[] strArr = new String[charArr.length];
-            for (int j = 0; j < charArr.length; j++) {
-                strArr[j] = String.valueOf(charArr[j]);
-            }
-            String result = String.join("-", strArr);
-
-            TaskResponse taskResponse = new TaskResponse(pR.getRecords().get(i).getId(),
-                    pR.getRecords().get(i).getAuthor(),
-                    pR.getRecords().get(i).getStatus(),
-                    result,
-                    pR.getRecords().get(i).getDate());
-
+        for (Task task : pR.getRecords()) {
+            String text = String.join("-", task.getText().split(""));
+            TaskResponse taskResponse = new TaskResponse(task.getId(),
+                    task.getAuthor(), task.getStatus(),
+                    text, task.getDate());
             pagResForClient.getRecords().add(taskResponse);
         }
-
-
-        /* for (int i = 0; i < pR.getRecords().size(); i++) {
-
-            StringBuilder stringBuilder = new StringBuilder(pR.getRecords().get(i).getText());
-
-            for (int j = 0; j < stringBuilder.length(); j++) {
-                if (j == 0) {
-                    stringBuilder.insert(j + 1, '-');
-                    continue;
-                }
-                if (j == 1) {
-                    continue;
-                }
-                if (j == stringBuilder.length() * 2 - 1) {
-                    stringBuilder.insert(j + 1, '-');
-                    break;
-                }
-                if (j % 2 == 0) {
-                    stringBuilder.insert(j + 1, '-');
-                }
-            }
-            String result = String.valueOf(stringBuilder);
-            TaskResponse taskResponse = new TaskResponse(pR.getRecords().get(i).getId(),
-                    pR.getRecords().get(i).getAuthor(),
-                    pR.getRecords().get(i).getStatus(),
-                    result,
-                    pR.getRecords().get(i).getDate());
-
-            pagResForClient.getRecords().add(taskResponse);
-        }*/
         pagResForClient.setCurrentPageNumber(pR.getCurrentPageNumber());
         pagResForClient.setLastPageNumber(pR.getLastPageNumber());
         pagResForClient.setPageSize(pagResForClient.getPageSize());
@@ -175,3 +135,4 @@ public class TaskService {
         return pagResForClient;
     }
 }
+

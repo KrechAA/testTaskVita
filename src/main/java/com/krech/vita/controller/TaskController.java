@@ -57,7 +57,7 @@ public class TaskController {
      * @param userName
      * @return
      */
-    @GetMapping(value = "/operator/tasks/{userName}")
+    @GetMapping(value = "/operator/tasks")
     public ResponseEntity<PaginationResult<TaskResponse>> getSentTasksByUser(@RequestParam(required = false, defaultValue = "1") int pageNumber,
                                                                      @RequestParam(required = false, defaultValue = "5") int pageSize,
                                                                      @RequestParam(required = false, defaultValue = "desc") String ordering,

@@ -79,21 +79,19 @@ public class TaskRepositoryImpl extends AbstractRepository implements TaskReposi
      */
     public PaginationResult<Task> getSentTasksByUser(int pageNumber, int pageSize, String ordering, String userName) {
         int lastPageNumber;
-        Long totalRecords;
+        long totalRecords;
         List<Task> taskList;
+        BigInteger bigInteger;
         try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
 
-            TypedQuery<Long> countQuery = session.createNativeQuery("SELECT COUNT (tasks.id) FROM tasks JOIN users ON tasks.author = user.id WHERE user.name LIKE " + userName + "%;", Long.class);
-            totalRecords = countQuery.getSingleResult();
+            NativeQuery countQuery = session.createNativeQuery("SELECT COUNT(tasks.id) FROM tasks JOIN users ON tasks.author = users.id WHERE users.name LIKE '" + userName + "%' GROUP BY users.name;");
+            bigInteger = (BigInteger) countQuery.getSingleResult();
+            totalRecords = bigInteger.longValue();
             lastPageNumber = calculatingLastPageNumberForPagination(pageSize, totalRecords);
 
-            session.getTransaction().commit();
-        }
-        try (Session session = sessionFactory.openSession()) {
-            session.getTransaction().begin();
 
-            TypedQuery<Task> query = session.createNativeQuery("SELECT * FROM tasks JOIN users ON tasks.author = user.id WHERE user.id WHERE user.name LIKE " + userName + "% ORDER BY tasks.date " + ordering + ";",
+            TypedQuery<Task> query = session.createNativeQuery("SELECT * FROM tasks JOIN users ON tasks.author = users.id WHERE users.name LIKE '" + userName + "%' ORDER BY tasks.date " + ordering,
                     Task.class);
 
             query.setFirstResult((pageNumber - 1) * pageSize);

@@ -39,6 +39,10 @@ public class Task implements Cloneable {
         return task;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public long getId() {
         return id;
     }

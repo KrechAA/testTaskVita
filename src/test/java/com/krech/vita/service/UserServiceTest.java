@@ -1,6 +1,8 @@
 package com.krech.vita.service;
 
+import com.krech.vita.domain.db.Role;
 import com.krech.vita.domain.db.User;
+import com.krech.vita.domain.rest.request.UpdateRoleRequest;
 import com.krech.vita.repository.RoleRepositoryImpl;
 import com.krech.vita.repository.UserRepositoryImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,12 +10,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashSet;
-import java.util.Optional;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,6 +72,77 @@ class UserServiceTest {
 
         assertThrows(AuthenticationServiceException.class, () -> userService.getByLoginAndVerifyPassword(login, password));
     }
+
+    @Test
+    void changeRoleTest() {
+        UpdateRoleRequest request = new UpdateRoleRequest(1L, 2);
+
+        User user = new User();
+        user.setRoles(new HashSet<>());
+        user.getRoles().add(new Role(1, "admin"));
+        user.getRoles().add(new Role(3,"user"));
+
+        Role role = new Role();
+        role.setId(2);
+        role.setName("operator");
+        when(userRepository.getUserById(request.getUserId())).thenReturn(user);
+        when(roleRepository.getRoleById(request.getRoleId())).thenReturn(role);
+        when(userRepository.updateUser(user)).thenReturn(user);
+
+        User result = userService.changeRole(request);
+        assertTrue(result.getRoles().contains(role));
+        assertEquals(1, result.getRoles().size());
+    }
+
+
+
+    @Test
+    void changeRoleTestOfException() {
+        UpdateRoleRequest request = new UpdateRoleRequest(1L, 2);
+
+        when(userRepository.getUserById(request.getUserId())).thenReturn(null);
+
+        assertThrows(IllegalArgumentException.class, () ->  userService.changeRole(request));
+
+    }
+
+    @Test
+    void addRoleTest() {
+        UpdateRoleRequest request = new UpdateRoleRequest(1L, 2);
+
+        User user = new User();
+        user.setRoles(new HashSet<>());
+        user.getRoles().add(new Role(1, "admin"));
+        user.getRoles().add(new Role(3,"user"));
+
+        Role role = new Role();
+        role.setId(2);
+        role.setName("operator");
+        when(userRepository.getUserById(request.getUserId())).thenReturn(user);
+        when(roleRepository.getRoleById(request.getRoleId())).thenReturn(role);
+        when(userRepository.updateUser(user)).thenReturn(user);
+
+        User result = userService.addRole(request);
+        assertTrue(result.getRoles().contains(role));
+        assertEquals(3, result.getRoles().size());
+    }
+
+
+    @Test
+    void addRoleTestOfException() {
+        UpdateRoleRequest request = new UpdateRoleRequest(1L, 2);
+
+        when(userRepository.getUserById(request.getUserId())).thenReturn(null);
+
+        assertThrows(IllegalArgumentException.class, () ->  userService.addRole(request));
+
+    }
+
+
+
+
+
+
 
 
 }
